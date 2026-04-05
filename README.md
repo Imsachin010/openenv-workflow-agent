@@ -1,12 +1,3 @@
----
-title: Openenv Workflow Agent
-emoji: 📈
-colorFrom: green
-colorTo: green
-sdk: docker
-pinned: false
-license: mit
----
 # 🧠 OpenEnv Workflow Agent — Decision-Making Under Uncertainty
 
 ## 🚀 Overview
