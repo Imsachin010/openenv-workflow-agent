@@ -1,0 +1,16 @@
+[project]
+name = "openenv-workflow-agent"
+version = "0.1.0"
+description = "OpenEnv workflow environment for decision-making under uncertainty"
+authors = [{name = "Sachin Mishra"}]
+dependencies = [
+    "pydantic",
+    "fastapi",
+    "uvicorn",
+    "openai",
+    "pyyaml"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
