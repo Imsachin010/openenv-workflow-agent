@@ -51,16 +51,18 @@ def llm_decide_action(email):
     Output only the action name.
     """
 
-    completion = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=10,
-        temperature=0.0,
-    )
-
-    action_text = completion.choices[0].message.content.strip().lower()
-
-    return action_text
+    try:
+        completion = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=10,
+            temperature=0.0,
+        )
+        action_text = completion.choices[0].message.content.strip().lower()
+        return action_text
+    except Exception as e:
+        print(f"LLM API error: {e}")
+        return "classify"
 
 
 # ---------------- POLICY ----------------
