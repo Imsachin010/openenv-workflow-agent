@@ -1,7 +1,6 @@
 pydantic==2.7.1
 typing-extensions
 python-dotenv
-pytest
 pyyaml
 fastapi
 uvicorn
