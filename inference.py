@@ -3,7 +3,11 @@ from openai import OpenAI
 
 from app.env import WorkflowEnv
 from app.actions import Action
+from tasks.easy import create_easy_task
+from tasks.medium import create_medium_task
 from tasks.hard import create_hard_task
+from graders.easy_grader import EasyGrader
+from graders.medium_grader import MediumGrader
 from graders.hard_grader import HardGrader
 
 
@@ -103,44 +107,51 @@ def get_action(obs):
 
 # ---------------- MAIN ----------------
 def main():
-    state, gt = create_hard_task()
-    env = WorkflowEnv(state)
-    grader = HardGrader()
+    tasks = [
+        ("easy", create_easy_task, EasyGrader),
+        ("medium", create_medium_task, MediumGrader),
+        ("hard", create_hard_task, HardGrader),
+    ]
 
-    obs = env.reset()
+    for task_name, create_func, GraderClass in tasks:
+        state, gt = create_func()
+        env = WorkflowEnv(state)
+        grader = GraderClass()
 
-    rewards = []
-    steps = 0
+        obs = env.reset()
 
-    log_start("hard", "workflow-env", MODEL_NAME)
+        rewards = []
+        steps = 0
 
-    try:
-        done = False
+        log_start(task_name, "workflow-env", MODEL_NAME)
 
-        while not done and steps < 10:
-            action = get_action(obs)
-            if action is None:
-                break
+        try:
+            done = False
 
-            obs, reward, done, _ = env.step(action)
+            while not done and steps < 10:
+                action = get_action(obs)
+                if action is None:
+                    break
 
-            rewards.append(reward)
-            steps += 1
+                obs, reward, done, _ = env.step(action)
 
-            log_step(steps, action.type, reward, done, None)
+                rewards.append(reward)
+                steps += 1
 
-            # stop after meaningful action
-            if action.type == "classify":
-                break
+                log_step(steps, action.type, reward, done, None)
 
-        trajectory = env.state().history
-        score = grader.grade(trajectory, gt)
+                # stop after meaningful action
+                if action.type == "classify":
+                    break
 
-        score = max(0.0, min(1.0, score))
-        success = score > 0.3
+            trajectory = env.state().history
+            score = grader.grade(trajectory, gt)
 
-    finally:
-        log_end(success, steps, score, rewards)
+            score = max(0.01, min(0.99, float(score)))  # Strictly between 0 and 1
+            success = score > 0.3
+
+        finally:
+            log_end(success, steps, score, rewards)
 
 
 if __name__ == "__main__":
